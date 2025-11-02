@@ -1,0 +1,73 @@
+---
+title: "Analisis Deret Waktu"
+author: "Dinda Dwi Anugrah Pertiwi"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, results = "show")
+```
+
+```{r echo=TRUE}
+# PLOT ACF (AUTOCORRELATION FUNCTION)
+
+# Model MA(2): Y_t = e_t - 0.9 * e_{t-1} - 0.5 * e_{t-2}
+
+par(mfrow = c(1, 2))
+
+# PLOT KIRI (ACF Teoretis)
+acf_teori_vector <- ARMAacf(ma = c(-0.9, -0.5), lag.max = 10)
+lags <- 1:10
+nilai_acf <- acf_teori_vector[2:(10 + 1)]
+plot(lags, nilai_acf, type = "h",
+     main = "ACF Teoretis MA(2)",
+     xlab = "Lag", ylab = "ACF",
+     ylim = c(-1, 1),
+     lwd = 3, col = "red",
+     xaxt = "n")
+axis(1, at = seq(1, 10, by = 1))
+abline(h = 0)
+
+# PLOT KANAN (ACF Sampel)
+set.seed(123)
+data_sim <- arima.sim(model = list(ma = c(-0.9, -0.5)), n = 500)
+acf_sampel_obj <- acf(data_sim, lag.max = 10, plot = FALSE)
+plot(acf_sampel_obj$lag[-1], acf_sampel_obj$acf[-1], type = "h",
+     main = "ACF Sampel MA(2)",
+     xlab = "Lag", ylab = "ACF",
+     ylim = c(-1, 1),
+     lwd = 2,
+     xaxt = "n")
+axis(1, at = seq(1, 10, by = 1))
+abline(h = 0)
+
+n <- 500
+batas_signifikan <- 1.96 / sqrt(n)
+abline(h = c(batas_signifikan, -batas_signifikan), lty = 2, col = "blue")
+
+par(mfrow = c(1, 1))
+```
+
+```{r echo=TRUE}
+# PLOT PACF (PARTIAL AUTOCORRELATION FUNCTION)
+
+par(mfrow = c(1, 2))
+
+# PLOT KIRI (PACF Teoretis)
+pacf_teori <- ARMAacf(ma = c(-0.9, -0.5), lag.max = 10, pacf = TRUE)
+plot(pacf_teori, type = "h",
+     main = "PACF Teoretis MA(2)",
+     xlab = "Lag", ylab = "PACF",
+     ylim = c(-1, 1),
+     lwd = 3, col = "red")
+abline(h = 0)
+
+# PLOT KANAN (PACF Sampel)
+set.seed(123)
+data_sim <- arima.sim(model = list(ma = c(-0.9, -0.5)), n = 500)
+pacf(data_sim, main = "PACF Sampel MA(2)", lag.max = 10)
+
+par(mfrow = c(1, 1))
+```
